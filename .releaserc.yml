@@ -1,0 +1,31 @@
+---
+branches:
+  - master
+
+tagFormat: "${version}"
+
+plugins:
+  - &gitlab "@semantic-release/gitlab"
+  - &git "@semantic-release/git"
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - - "@semantic-release/exec"
+    - verifyReleaseCmd: "echo ${nextRelease.version} > .next-release"
+      prepareCmd: "echo Prepare release ${nextRelease.version}"
+      publishCmd: "echo Publish release ${nextRelease.version}"
+  - &ch "@semantic-release/changelog"
+
+verifyConditions:
+  - *gitlab
+  - *git
+  - *ch
+
+prepare:
+  - *ch
+  - path: *git
+    message: "docs(release): ${nextRelease.version}\n\n${nextRelease.notes}"
+    assets:
+      - "CHANGELOG.md"
+
+publish:
+  - *gitlab
